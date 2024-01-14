@@ -3,13 +3,14 @@ import { json } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export const API_ENDPOINT = "https://current-bill.vercel.app";
+// export const API_ENDPOINT = "http://localhost:4001";
 
 const MyAPI = {
     async get(url, token = null) {
         try {
             const headers = token ? { Authorization: `Bearer ${token}` } : {};
             const response = await axios.get(`${API_ENDPOINT}${url}`, { headers });
-            return { status: response.status, data: response.data };
+            return { status: response.status,message:response.message, data: response.data };
         } catch (error) {
             return { status: error.response?.status || 501, error: error.message };
         }
@@ -19,7 +20,7 @@ const MyAPI = {
             let convertData = JSON.stringify(data);
             const headers = token ? { Authorization: `Bearer ${token}` } : {};
             const response = await axios.post(`${API_ENDPOINT}${url}`, data, { headers });
-            return { status: response.status, data: response.data };
+            return { status: response.status,message:response.message, data: response.data };
         } catch (error) {
             return { status: error.response?.status || 500, error: error.message };
         }
@@ -39,6 +40,18 @@ const MyAPI = {
 export const CError = {
     warn(message){
         toast.warn(message, {
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+        });
+    },
+    success(message){
+        toast.success(message, {
             position: "bottom-right",
             autoClose: 5000,
             hideProgressBar: false,
