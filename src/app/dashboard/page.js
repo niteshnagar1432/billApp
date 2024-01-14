@@ -1,10 +1,9 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import ParentDashbord from '../components/ParentDashbord'
-import MyComponent from '../components/Models'
+import ParentDashbord from '../components/ParentDashbord.js'
 import { Button, Form, Modal } from 'react-bootstrap';
-import MyAPI, { CError, Item } from '../components/MyAPI';
-import BillList from '../components/BillList';
+import MyAPI, { CError, Item } from '../components/MyAPI.jsx';
+import BillList from '../components/BillList.js';
 
 function page() {
   const [showAddBankModal, setShowAddBankModal] = useState(false);
