@@ -2,8 +2,8 @@ import axios from "axios";
 import { json } from "react-router-dom";
 import { toast } from "react-toastify";
 
-// export const API_ENDPOINT = "https://current-bill.vercel.app";
-export const API_ENDPOINT = "http://localhost:4001";
+export const API_ENDPOINT = "https://current-bill.vercel.app";
+// export const API_ENDPOINT = "http://localhost:4001";
 
 const MyAPI = {
     async get(url, token = null) {
