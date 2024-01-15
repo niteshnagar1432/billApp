@@ -17,6 +17,8 @@ import { HiMenuAlt1 } from "react-icons/hi";
 import { MdMenuOpen } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
 import { useRouter } from 'next/navigation';
+import MyAPI, { CError, Item } from './MyAPI';
+import Moment from 'react-moment';
 // const Logo = require('../../images/logo.b08faae67f6c650cfef4.png');
 // const Logo = require('/images/logo.b08faae67f6c650cfef4.png');
 // const "/images/A 1.png" = require('/images/A 1.png');
@@ -24,7 +26,29 @@ import { useRouter } from 'next/navigation';
 
 function ParentDashbord({children}) {
 
-    let navigate = useRouter()
+    let navigater = useRouter()
+    let [token,setToken] = useState('');
+    const [ActivitiesList,setActivitiesList] = useState(null);
+
+    useEffect(() => {
+        let tokenn = Item.getItem('token');
+        if (tokenn) {
+          setToken(tokenn);
+          MyAPI.get('/activity/all', token)
+            .then((res) => {
+              let { status, activities, message } = res.data || res;
+              if (status === true) {
+                setActivitiesList(activities);
+              } else {
+                CError.error(res.error || message);
+              }
+            }).catch(err => {
+              CError.error(err.message);
+            });
+        } else {
+          navigater.push('/');
+        }
+      }, [token]);
 
     let options = [
         {
@@ -36,8 +60,8 @@ function ParentDashbord({children}) {
         },
         {
             id: 2,
-            name: 'Calendar',
-            url: '/calendar',
+            name: 'Activity',
+            url: '/dashboard/activity',
             icon: <FaRegCalendarAlt />,
             isActive: false
         },
@@ -89,7 +113,7 @@ function ParentDashbord({children}) {
             }
         });
         setLeftSideBarOptions(updatedOptions);
-        // navigate(leftSideBarOptions[id].url);
+        navigater.push(leftSideBarOptions[id].url);
     };
 
     useEffect(() => {
@@ -310,50 +334,24 @@ function ParentDashbord({children}) {
                                     <span className="heading"><b>Recent Activity</b></span>
                                     <SlOptions />
                                 </Col>
-                                <Row className='mt-3'>
-                                    <Col md={3} className='d-flex align-items-center justify-content-end'>
-                                        <div className="profile-action-upcoming " style={{ width: '50px' }}>
-                                            <Image src={"/images/notification-icon.png"} style={{ width: '100%', height: '100%', objectFit: 'contain' }} ></Image>
-                                        </div>
-                                    </Col>
-                                    <Col md={9} className='ps-2'>
-                                        <Col style={{ fontWeight: 700 }}>Submisson NLP Programming</Col>
-                                        <Col style={{ opacity: '.8' }}>04 Jan, 09:20 AM</Col>
-                                    </Col>
-                                </Row>
-                                <Row className='mt-3'>
-                                    <Col md={3} className='d-flex align-items-center justify-content-end'>
-                                        <div className="profile-action-upcoming " style={{ width: '50px' }}>
-                                            <Image src={"/images/notification-icon.png"} style={{ width: '100%', height: '100%', objectFit: 'contain' }} ></Image>
-                                        </div>
-                                    </Col>
-                                    <Col md={9} className='ps-2'>
-                                        <Col style={{ fontWeight: 700 }}>Outcome administration</Col>
-                                        <Col style={{ opacity: '.8' }}>04 Jan, 09:20 AM</Col>
-                                    </Col>
-                                </Row>
-                                <Row className='mt-3'>
-                                    <Col md={3} className='d-flex align-items-center justify-content-end'>
-                                        <div className="profile-action-upcoming " style={{ width: '50px' }}>
-                                            <Image src={"/images/notification-icon.png"} style={{ width: '100%', height: '100%', objectFit: 'contain' }} ></Image>
-                                        </div>
-                                    </Col>
-                                    <Col md={9} className='ps-2'>
-                                        <Col style={{ fontWeight: 700 }}>Teacher Panel Discussion</Col>
-                                        <Col style={{ opacity: '.8' }}>04 Jan, 09:20 AM</Col>
-                                    </Col>
-                                </Row>
-                                <Row className='mt-3'>
-                                    <Col md={3} className='d-flex align-items-center justify-content-end'>
-                                        <div className="profile-action-upcoming " style={{ width: '50px' }}>
-                                            <Image src={"/images/notification-icon.png"} style={{ width: '100%', height: '100%', objectFit: 'contain' }} ></Image>
-                                        </div>
-                                    </Col>
-                                    <Col md={9} className='ps-2'>
-                                        <Col style={{ fontWeight: 700 }}>Submisson Data Structure</Col>
-                                        <Col style={{ opacity: '.8' }}>04 Jan, 09:20 AM</Col>
-                                    </Col>
-                                </Row>
+                                {ActivitiesList && ActivitiesList.length >0 ? ActivitiesList.map((Activity,index)=>(
+                                     <Row className='mt-3' key={index}>
+                                     <Col md={3} className='d-flex align-items-center justify-content-end'>
+                                         <div className="profile-action-upcoming " style={{ width: '50px' }}>
+                                             <Image src={"/images/notification-icon.png"} style={{ width: '100%', height: '100%', objectFit: 'contain' }} ></Image>
+                                         </div>
+                                     </Col>
+                                     <Col md={9} className='ps-2'>
+                                         <Col style={{ fontWeight: 700 }}>{Activity.message}</Col>
+                                         <Col style={{ opacity: '.8' }}>
+                                         <Moment format="DD MMM, hh:mm A" locale="en">
+                                            {Activity.createdAt}
+                                        </Moment>
+                                         </Col>
+                                     </Col>
+                                 </Row>
+                                )):(<h6>No Activity found.</h6>)}
+                               
                                 <Col className='mt-4 d-flex align-items-center justify-content-between ps-2 pe-2'>
                                     <span className="heading"><b>Latest Message</b></span>
                                     <SlOptions />

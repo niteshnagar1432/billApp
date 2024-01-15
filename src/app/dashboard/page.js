@@ -42,7 +42,7 @@ function page() {
     let tokenn = Item.getItem('token');
     if (tokenn) {
       setToken(tokenn);
-      MyAPI.get('/user/bank', token)
+      MyAPI.get('/user/bank', tokenn)
         .then((res) => {
           let { status, banks, message } = res.data || res;
           if (status === true) {
