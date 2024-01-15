@@ -1,8 +1,8 @@
 'use client'
-import ActivityList from '@/app/components/ActivityList';
+import ActivityList from '@/app/components/ActivityList.js';
 import React, { useEffect, useState } from 'react'
-import MyAPI, { CError, Item } from '@/app/components/MyAPI';
-import ParentDashbord from '@/app/components/ParentDashbord'
+import MyAPI, { CError, Item } from '@/app/components/MyAPI.jsx';
+import ParentDashbord from '@/app/components/ParentDashbord.js'
 import { useRouter } from 'next/navigation';
 import { Button, Col, Form, Row } from 'react-bootstrap';
 

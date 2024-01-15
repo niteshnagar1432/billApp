@@ -17,7 +17,7 @@ import { HiMenuAlt1 } from "react-icons/hi";
 import { MdMenuOpen } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
 import { useRouter } from 'next/navigation';
-import MyAPI, { CError, Item } from './MyAPI';
+import MyAPI, { CError, Item } from './MyAPI.jsx';
 import Moment from 'react-moment';
 // const Logo = require('../../images/logo.b08faae67f6c650cfef4.png');
 // const Logo = require('/images/logo.b08faae67f6c650cfef4.png');

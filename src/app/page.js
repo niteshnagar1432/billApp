@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Tab, Tabs } from 'react-bootstrap';
-import { LoginForm, SignupForm } from './components/LoginForm';
+import { LoginForm, SignupForm } from './components/LoginForm.js';
 
 const page = () => {
   const [activeTab, setActiveTab] = useState('login');
