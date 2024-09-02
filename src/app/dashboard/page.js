@@ -1,10 +1,10 @@
-'use client'
-import React, { useEffect, useState } from 'react'
-import ParentDashbord from '../components/ParentDashbord.js'
-import { Button, Form, Modal } from 'react-bootstrap';
-import MyAPI, { CError, Item } from '../components/MyAPI.jsx';
-import BillList from '../components/BillList.js';
-import { useRouter } from 'next/navigation.js';
+"use client";
+import React, { useEffect, useState } from "react";
+import ParentDashbord from "../components/ParentDashbord.js";
+import { Button, Form, Modal } from "react-bootstrap";
+import MyAPI, { CError, Item } from "../components/MyAPI.jsx";
+import BillList from "../components/BillList.js";
+import { useRouter } from "next/navigation.js";
 
 function page() {
   const navigater = useRouter();
@@ -12,37 +12,34 @@ function page() {
   const [showCheckBalanceModal, setShowCheckBalanceModal] = useState(false);
   const [showAddBalanceModal, setShowAddBalanceModal] = useState(false);
   const [showAddBillModal, setShowAddBillModal] = useState(false);
-  const [bankName, setBankName] = useState('');
+  const [bankName, setBankName] = useState("");
 
   const openAddBankModal = () => setShowAddBankModal(true);
   const openCheckBalanceModal = () => setShowCheckBalanceModal(true);
   const openAddBalanceModal = () => setShowAddBalanceModal(true);
   const openAddBillModal = () => setShowAddBillModal(true);
 
-  const [token, setToken] = useState('');
+  const [token, setToken] = useState("");
   const [bill, setBills] = useState(null);
   const [bankList, setBankList] = useState(null);
-  const [selectedBank,setSelectedBank] = useState('');
-  const [balance,setBalance] = useState('');
-  const [checkedBalance,setCheckBalance] = useState(null);
-  const [billDetails,setBillDetails] = useState('');
-  const [billAmount,setBillAmount] = useState('');
+  const [selectedBank, setSelectedBank] = useState("");
+  const [balance, setBalance] = useState("");
+  const [checkedBalance, setCheckBalance] = useState(null);
+  const [billDetails, setBillDetails] = useState("");
+  const [billAmount, setBillAmount] = useState("");
 
   const handleCloseModal = () => {
     setShowAddBankModal(false);
     setShowCheckBalanceModal(false);
     setShowAddBalanceModal(false);
     setShowAddBillModal(false);
-    setSelectedBank('');
+    setSelectedBank("");
     setCheckBalance(null);
   };
-  
 
-  useEffect(() => {
-    let tokenn = Item.getItem('token');
-    if (tokenn) {
-      setToken(tokenn);
-      MyAPI.get('/user/bank', tokenn)
+  const fetchBanks = async (tokenn) => {
+    try {
+      MyAPI.get("/user/bank", tokenn)
         .then((res) => {
           let { status, banks, message } = res.data || res;
           if (status === true) {
@@ -50,17 +47,28 @@ function page() {
           } else {
             CError.error(res.error || message);
           }
-        }).catch(err => {
+        })
+        .catch((err) => {
           CError.error(err.message);
         });
+    } catch (error) {
+      CError.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    let tokenn = Item.getItem("token");
+    if (tokenn) {
+      setToken(tokenn);
+      fetchBanks(tokenn);
     } else {
-      navigater.push('/');
+      navigater.push("/");
     }
   }, [token]);
 
-  useEffect(() => {
-    if (token) {
-      MyAPI.get('/bill/bills', token)
+  const fetchBills = async (token) => {
+    try {
+      MyAPI.get("/bill/bills", token)
         .then((res) => {
           let { status, data, message } = res.data || res;
           if (status === true) {
@@ -68,75 +76,101 @@ function page() {
           } else {
             CError(message || res.error || res.message);
           }
-        }).catch(err => {
+        })
+        .catch((err) => {
           CError.error(err.message);
         });
+    } catch (error) {
+      CError.error(error.message);
     }
-  }, [token])
+  };
+
+  useEffect(() => {
+    if (token) {
+      fetchBills(token);
+    }
+  }, [token]);
 
   const handleAddBank = () => {
     if (token) {
-      MyAPI.post('/bank/add', { name: bankName }, token)
+      MyAPI.post("/bank/add", { name: bankName }, token)
         .then((res) => {
           let { status, message } = res.data || res;
           if (status === true) {
-            setBankName('');
+            setBankName("");
             CError.success(message);
             handleCloseModal();
           } else {
             CError.error(message || res.error || res.message);
           }
-        }).catch(err => {
+        })
+        .catch((err) => {
           CError.error(err.message);
         });
     }
-  }
-
-  const handleAddBalance = ()=>{
-    MyAPI.post('/bank/add/balance',{bankId:selectedBank,amount:balance},token)
-    .then((res)=>{
-      let {status,message} = res.data || res;
-      if(status === true){
-        setSelectedBank('');
-        setBalance('');
-        handleCloseModal();
-        CError.success(message);
-      }else{
-        CError.error(message || res.error || res.message);
-      }
-    }).catch(err=>{
-      CError.error(err.message);
-    });
   };
 
-  const handleCheckBalance = ()=>{
-      MyAPI.post('/bank/check/balance',{bankId:selectedBank},token)
-      .then((res)=>{
-        let {status,message,availableBalance,bankName} = res.data || res;
-        if(status === true){
-          setCheckBalance({availableBalance,bankName});
-        }else{
+  const handleAddBalance = () => {
+    MyAPI.post(
+      "/bank/add/balance",
+      { bankId: selectedBank, amount: balance },
+      token
+    )
+      .then((res) => {
+        let { status, message } = res.data || res;
+        if (status === true) {
+          setSelectedBank("");
+          setBalance("");
+          handleCloseModal();
+          CError.success(message);
+        } else {
           CError.error(message || res.error || res.message);
         }
-      }).catch(err=>{
+      })
+      .catch((err) => {
         CError.error(err.message);
       });
   };
 
-  const handleAddBill = ()=>{
-    MyAPI.post('/bill/create',{bankId:selectedBank,amount:billAmount,details:billDetails},token)
-    .then((res)=>{
-      let {status,message} = res.data || res;
-      if(status === true){
-        setSelectedBank('');
-        setBillAmount('');
-        setBillDetails('');
-        handleCloseModal();
-        CError.success(message);
-      }else{
-        CError.error(message || res.error || res.message);
-      }
-    }).catch(err=>{
+  const handleCheckBalance = () => {
+    MyAPI.post("/bank/check/balance", { bankId: selectedBank }, token)
+      .then((res) => {
+        let { status, message, availableBalance, bankName } = res.data || res;
+        if (status === true) {
+          setCheckBalance({ availableBalance, bankName });
+        } else {
+          CError.error(message || res.error || res.message);
+        }
+      })
+      .catch((err) => {
+        CError.error(err.message);
+      });
+  };
+
+  const [isLoading, setIsLoading] = useState(false);
+  const handleAddBill = () => {
+    setIsLoading(true);
+    MyAPI.post(
+      "/bill/create",
+      { bankId: selectedBank, amount: billAmount, details: billDetails },
+      token
+    )
+      .then((res) => {
+        setIsLoading(false);
+        let { status, message } = res.data || res;
+        if (status === true) {
+          fetchBills();
+          setSelectedBank("");
+          setBillAmount("");
+          setBillDetails("");
+          handleCloseModal();
+          CError.success(message);
+        } else {
+          CError.error(message || res.error || res.message);
+        }
+      })
+      .catch((err) => {
+        setIsLoading(false);
         CError.error(err.message);
       });
   };
@@ -147,17 +181,16 @@ function page() {
       <div>
         <Button variant="primary" onClick={openAddBankModal}>
           Add Bank
-        </Button>{' '}
+        </Button>{" "}
         <Button variant="success" onClick={openCheckBalanceModal}>
           Check Balance
-        </Button>{' '}
+        </Button>{" "}
         <Button variant="info" onClick={openAddBalanceModal}>
           Add Balance
-        </Button>{' '}
+        </Button>{" "}
         <Button variant="warning" onClick={openAddBillModal}>
           Add Bill
         </Button>
-
         {/* Add Bank Modal */}
         <Modal show={showAddBankModal} onHide={handleCloseModal}>
           <Modal.Header closeButton>
@@ -178,65 +211,85 @@ function page() {
             </Button>
           </Modal.Body>
         </Modal>
-
         {/* Check Balance Modal */}
         <Modal show={showCheckBalanceModal} onHide={handleCloseModal}>
           <Modal.Header closeButton>
             <Modal.Title>Check Balance</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {!checkedBalance &&(
-            <Form.Group className="mb-3" controlId="bankSelect">
-              <Form.Label>Select Bank:</Form.Label>
-              <Form.Control
-                as="select"
-              value={selectedBank}
-              onChange={(e) => setSelectedBank(e.target.value)}
-              >
-                <option value="" disabled>Select a bank</option>
-                {bankList && bankList.length > 0 ? bankList.map((bank, index) => (
-                  <option key={index} value={bank.bankId}>
-                    {bank.bankName}
+            {!checkedBalance && (
+              <Form.Group className="mb-3" controlId="bankSelect">
+                <Form.Label>Select Bank:</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={selectedBank}
+                  onChange={(e) => setSelectedBank(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Select a bank
                   </option>
-                )) : (
-                  <option value="" disabled>No banks available</option>
-                )}
-              </Form.Control>
-            </Form.Group>
-            ) }
+                  {bankList && bankList.length > 0 ? (
+                    bankList.map((bank, index) => (
+                      <option key={index} value={bank.bankId}>
+                        {bank.bankName}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="" disabled>
+                      No banks available
+                    </option>
+                  )}
+                </Form.Control>
+              </Form.Group>
+            )}
             {checkedBalance && (
               <>
-                <center> <h3>{checkedBalance.bankName}</h3> </center>
-              <br />
-              <center> <h5> INR {checkedBalance.availableBalance}</h5> </center>
+                <center>
+                  {" "}
+                  <h3>{checkedBalance.bankName}</h3>{" "}
+                </center>
+                <br />
+                <center>
+                  {" "}
+                  <h5> INR {checkedBalance.availableBalance}</h5>{" "}
+                </center>
               </>
             )}
-            <Button variant="primary" type="button" onClick={handleCheckBalance}>
+            <Button
+              variant="primary"
+              type="button"
+              onClick={handleCheckBalance}
+            >
               Check Balance
             </Button>
           </Modal.Body>
         </Modal>
-
         {/* Add Balance Modal */}
         <Modal show={showAddBalanceModal} onHide={handleCloseModal}>
           <Modal.Header closeButton>
             <Modal.Title>Add Balance</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-          <Form.Group className="mb-3" controlId="bankSelect">
+            <Form.Group className="mb-3" controlId="bankSelect">
               <Form.Label>Select Bank:</Form.Label>
               <Form.Control
                 as="select"
-              value={selectedBank}
-              onChange={(e) => setSelectedBank(e.target.value)}
+                value={selectedBank}
+                onChange={(e) => setSelectedBank(e.target.value)}
               >
-                <option value="" disabled>Select a bank</option>
-                {bankList && bankList.length > 0 ? bankList.map((bank, index) => (
-                  <option key={index} value={bank.bankId}>
-                    {bank.bankName}
+                <option value="" disabled>
+                  Select a bank
+                </option>
+                {bankList && bankList.length > 0 ? (
+                  bankList.map((bank, index) => (
+                    <option key={index} value={bank.bankId}>
+                      {bank.bankName}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    No banks available
                   </option>
-                )) : (
-                  <option value="" disabled>No banks available</option>
                 )}
               </Form.Control>
             </Form.Group>
@@ -254,27 +307,32 @@ function page() {
             </Button>
           </Modal.Body>
         </Modal>
-
         {/* Add Bill Modal */}
         <Modal show={showAddBillModal} onHide={handleCloseModal}>
           <Modal.Header closeButton>
             <Modal.Title>Add Bill</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-          <Form.Group className="mb-3" controlId="bankSelect">
+            <Form.Group className="mb-3" controlId="bankSelect">
               <Form.Label>Select Bank:</Form.Label>
               <Form.Control
                 as="select"
-              value={selectedBank}
-              onChange={(e) => setSelectedBank(e.target.value)}
+                value={selectedBank}
+                onChange={(e) => setSelectedBank(e.target.value)}
               >
-                <option value="" disabled>Select a bank</option>
-                {bankList && bankList.length > 0 ? bankList.map((bank, index) => (
-                  <option key={index} value={bank.bankId}>
-                    {bank.bankName}
+                <option value="" disabled>
+                  Select a bank
+                </option>
+                {bankList && bankList.length > 0 ? (
+                  bankList.map((bank, index) => (
+                    <option key={index} value={bank.bankId}>
+                      {bank.bankName}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    No banks available
                   </option>
-                )) : (
-                  <option value="" disabled>No banks available</option>
                 )}
               </Form.Control>
             </Form.Group>
@@ -297,16 +355,20 @@ function page() {
                 onChange={(e) => setBillDetails(e.target.value)}
               />
             </Form.Group>
-            <Button variant="primary" type="button" onClick={handleAddBill}>
-              Add Bill
+            <Button
+              variant="primary"
+              disabled={isLoading}
+              type="button"
+              onClick={handleAddBill}
+            >
+              {isLoading ? "Loading" : "Add Bill"}
             </Button>
           </Modal.Body>
         </Modal>
       </div>
       {bill && bill.length > 0 ? <BillList bills={bill} /> : <h1>No Bills</h1>}
-
     </ParentDashbord>
-  )
+  );
 }
 
-export default page
+export default page;
